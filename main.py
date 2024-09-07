@@ -14,7 +14,7 @@ SESSION_NAME = 'session_name'  # Change this as needed
 AUTHORIZED_USER_IDS = {123456789, 987654321}  # Replace with actual user IDs
 
 # Conversation states
-CHOOSING, REASON, TARGET_INFO = range(3)
+CHOOSING, REASON, TARGET_INFO, NUM_REPORTS = range(4)
 
 # Predefined reasons mapping
 REASONS_MAPPING = {
@@ -97,10 +97,31 @@ def handle_target_info(update, context):
     target_info = update.message.text
     context.user_data['target_info'] = target_info
     
-    update.message.reply_text(f"Reporting {context.user_data['target_info']} for {context.user_data['reason']}.")
+    # Prompt user for number of reports
+    update.message.reply_text(f"Reporting {context.user_data['target_info']} for {context.user_data['reason']}. How many times do you want to report it?")
+    return NUM_REPORTS
+
+def get_num_reports(update, context):
+    user_id = update.message.from_user.id
+    if user_id not in AUTHORIZED_USER_IDS:
+        update.message.reply_text("You are not authorized to use this bot.")
+        return ConversationHandler.END
+    
+    try:
+        num_reports = int(update.message.text)
+        if num_reports <= 0:
+            raise ValueError
+    except ValueError:
+        update.message.reply_text("Please enter a valid number of reports.")
+        return NUM_REPORTS
+    
+    context.user_data['num_reports'] = num_reports
+    
+    update.message.reply_text(f"Reporting {context.user_data['target_info']} {num_reports} times for {context.user_data['reason']}.")
     
     # Handle reporting logic
-    report_target(context.user_data['report_type'], context.user_data['target_info'], context.user_data['reason'])
+    for _ in range(num_reports):
+        report_target(context.user_data['report_type'], context.user_data['target_info'], context.user_data['reason'])
     
     return ConversationHandler.END
 
@@ -164,6 +185,7 @@ def main():
             CHOOSING: [CallbackQueryHandler(choose_report_type)],
             REASON: [CallbackQueryHandler(get_reason)],
             TARGET_INFO: [MessageHandler(Filters.text & ~Filters.command, handle_target_info)],
+            NUM_REPORTS: [MessageHandler(Filters.text & ~Filters.command, get_num_reports)],
         },
         fallbacks=[CommandHandler('start', start)],
     )
