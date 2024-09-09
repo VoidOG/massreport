@@ -1,17 +1,17 @@
 import os
 from telethon import TelegramClient, functions
 from telethon.errors import SessionPasswordNeededError
-from telethon.tl.types import ReportReason
+from telethon.tl.custom import ReportReasons
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler, Filters, ConversationHandler
 
 # Constants
 API_ID = '23459191'
-API_HASH = 'd5f3a01c7bcb41aa1214808b5818c109'
+API_HASH = '2ec36ea724f3b846f217a7677e3b5cfd'
 BOT_TOKEN = '7240682346:AAF6gZNwrO3CPLBPYYtg0yiEPxZVTqoJut0'
 
 # Authorized User IDs (add your user IDs here)
-AUTHORIZED_USER_IDS = {6698364560, 6663845789, 1110013191}
+AUTHORIZED_USER_IDS = {6663845789, 1110013191, 6698364560}
 
 # Reporting accounts details
 REPORTING_ACCOUNTS = [
@@ -32,13 +32,13 @@ CHOOSING, REASON, TARGET_INFO, NUM_REPORTS = range(4)
 
 # Predefined reasons mapping
 REASONS_MAPPING = {
-    'spam': ReportReason.SPAM,
-    'violence': ReportReason.VIOLENCE,
-    'hate_speech': ReportReason.HATE_SPEECH,
-    'sexual_content': ReportReason.SEXUAL_CONTENT,
-    'harassment': ReportReason.HARASSMENT,
-    'fake_account': ReportReason.FAKE_ACCOUNT,
-    'other': ReportReason.OTHER,
+    'spam': ReportReasons.SPAM,
+    'violence': ReportReasons.VIOLENCE,
+    'hate_speech': ReportReasons.HATE_SPEECH,
+    'sexual_content': ReportReasons.SEXUAL_CONTENT,
+    'harassment': ReportReasons.HARASSMENT,
+    'fake_account': ReportReasons.FAKE_ACCOUNT,
+    'other': ReportReasons.OTHER,
 }
 
 def start(update, context):
@@ -121,7 +121,7 @@ def report_target(account, report_type, target_info, reason):
     async def perform_reporting():
         await client.start(phone=account['phone'])
         try:
-            report_reason = REASONS_MAPPING.get(reason, ReportReason.OTHER)
+            report_reason = REASONS_MAPPING.get(reason, ReportReasons.OTHER)
             
             if report_type == 'report_account':
                 await client(functions.account.ReportPeerRequest(
@@ -135,12 +135,12 @@ def report_target(account, report_type, target_info, reason):
                 ))
             elif report_type == 'report_message':
                 message_link = target_info
-                # Extract message ID and chat ID from the link
+                # Implement extraction of message ID and chat ID from the link
                 message_id, chat_id = extract_message_and_chat_id(message_link)
                 await client(functions.messages.ReportRequest(
                     peer=chat_id,
                     id=message_id,
-                    reason=report_reason
+                    reason=report_reason,
                 ))
         except SessionPasswordNeededError:
             # Handle two-step verification
