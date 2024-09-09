@@ -44,7 +44,6 @@ REASONS_MAPPING = {
     'fake_account': InputReportReasonFake(),
     'other': InputReportReasonOther(),
 }
-}
 
 def start(update, context):
     user_id = update.message.from_user.id
