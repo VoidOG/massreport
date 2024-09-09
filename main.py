@@ -6,24 +6,24 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler, Filters, ConversationHandler
 
 # Constants
-API_ID = 'YOUR_API_ID'
-API_HASH = 'YOUR_API_HASH'
-BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN'
+API_ID = '23459191'
+API_HASH = 'd5f3a01c7bcb41aa1214808b5818c109'
+BOT_TOKEN = '7240682346:AAF6gZNwrO3CPLBPYYtg0yiEPxZVTqoJut0'
 
 # Authorized User IDs (add your user IDs here)
-AUTHORIZED_USER_IDS = {123456789, 987654321}
+AUTHORIZED_USER_IDS = {6663845789 6663845789 1110013191}
 
 # Reporting accounts details
 REPORTING_ACCOUNTS = [
     {
-        'phone': 'YOUR_REPORTER_1_PHONE_NUMBER',
-        'api_id': 'YOUR_REPORTER_1_API_ID',
-        'api_hash': 'YOUR_REPORTER_1_API_HASH'
+        'phone': '+919352148429',
+        'api_id': '23459191',
+        'api_hash': 'd5f3a01c7bcb41aa1214808b5818c109'
     },
     {
-        'phone': 'YOUR_REPORTER_2_PHONE_NUMBER',
-        'api_id': 'YOUR_REPORTER_2_API_ID',
-        'api_hash': 'YOUR_REPORTER_2_API_HASH'
+        'phone': '+27636385630',
+        'api_id': '25162649',
+        'api_hash': '2ec36ea724f3b846f217a7677e3b5cfd'
     }
 ]
 
