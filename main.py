@@ -1,7 +1,9 @@
 import os
 from telethon import TelegramClient, functions
 from telethon.errors import SessionPasswordNeededError
-from telethon.tl.types import ReportReason
+from telethon.tl.types import (InputReportReasonSpam, InputReportReasonViolence, 
+                               InputReportReasonPornography, InputReportReasonOther, 
+                               InputReportReasonFake)
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler, Filters, ConversationHandler
 from dotenv import load_dotenv
@@ -34,13 +36,15 @@ CHOOSING, REASON, TARGET_INFO, NUM_REPORTS = range(4)
 
 # Predefined reasons mapping
 REASONS_MAPPING = {
-    'spam': ReportReason.SPAM,
-    'violence': ReportReason.VIOLENCE,
-    'hate_speech': ReportReason.HATE_SPEECH,
-    'sexual_content': ReportReason.SEXUAL_CONTENT,
-    'harassment': ReportReason.HARASSMENT,
-    'fake_account': ReportReason.FAKE_ACCOUNT,
-    'other': ReportReason.OTHER,
+REASONS_MAPPING = {
+    'spam': InputReportReasonSpam(),
+    'violence': InputReportReasonViolence(),
+    'hate_speech': InputReportReasonOther(),  # Since 'Hate Speech' doesn't have a direct mapping, 'Other' is used.
+    'sexual_content': InputReportReasonPornography(),
+    'harassment': InputReportReasonOther(),  # 'Harassment' can be categorized under 'Other'.
+    'fake_account': InputReportReasonFake(),
+    'other': InputReportReasonOther(),
+}
 }
 
 def start(update, context):
