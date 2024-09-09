@@ -15,7 +15,9 @@ load_dotenv()
 API_ID = os.getenv('API_ID')
 API_HASH = os.getenv('API_HASH')
 BOT_TOKEN = os.getenv('BOT_TOKEN')
-AUTHORIZED_USER_IDS = set(map(int, os.getenv('AUTHORIZED_USER_IDS').split(',')))
+AUTHORIZED_USER_IDS = set(
+    map(int, (os.getenv('AUTHORIZED_USER_IDS') or "").split(' '))
+)
 
 # Reporting accounts details
 REPORTING_ACCOUNTS = [
