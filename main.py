@@ -108,16 +108,20 @@ def get_num_reports(update, context):
     context.user_data['num_reports'] = num_reports
     update.message.reply_text(f"Reporting {context.user_data['target_info']} {num_reports} times for {context.user_data['reason']}.")
 
-    # Perform reporting
-    for i in range(num_reports):
-        for account in REPORTING_ACCOUNTS:
-            report_target(account, context.user_data['report_type'], context.user_data['target_info'], context.user_data['reason'])
-            update.message.reply_text(f"{i+1} report(s) sent.")
-    
-    update.message.reply_text("Reporting completed.")
+    # Perform reporting asynchronously
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(report_targets(context.user_data['report_type'], context.user_data['target_info'], context.user_data['reason'], context.user_data['num_reports'], update.message))
+
     return ConversationHandler.END
 
-def report_target(account, report_type, target_info, reason):
+async def report_targets(report_type, target_info, reason, num_reports, message):
+    for i in range(num_reports):
+        for account in REPORTING_ACCOUNTS:
+            await report_target(account, report_type, target_info, reason)
+            message.reply_text(f"{i + 1} report(s) sent.")
+    message.reply_text("Reporting completed.")
+
+async def report_target(account, report_type, target_info, reason):
     client = TelegramClient(account['phone'], account['api_id'], account['api_hash'])
 
     async def perform_reporting():
@@ -135,7 +139,6 @@ def report_target(account, report_type, target_info, reason):
                 ))
             elif report_type == 'report_message':
                 message_link = target_info
-                # Implement extraction of message ID and chat ID from the link
                 message_id, chat_id = extract_message_and_chat_id(message_link)
                 await client(functions.messages.ReportRequest(
                     peer=chat_id,
@@ -143,21 +146,17 @@ def report_target(account, report_type, target_info, reason):
                     reason=REASONS_MAPPING.get(reason, 'other'),
                 ))
         except SessionPasswordNeededError:
-            # Handle two-step verification
             password = input("Two-step verification is enabled. Enter your 2SV password: ")
             await client.start(password=password)
-            # Retry reporting after successful login
         finally:
             await client.disconnect()
 
-    with client:
-        client.loop.run_until_complete(perform_reporting())
+    await perform_reporting()
 
 def extract_message_and_chat_id(message_link):
-    # Example link format: 'https://t.me/c/<chat_id>/<message_id>'
     parts = message_link.strip().split('/')
-    chat_id = int(parts[-2])  # The second last part is the chat ID
-    message_id = int(parts[-1])  # The last part is the message ID
+    chat_id = int(parts[-2])
+    message_id = int(parts[-1])
     return message_id, chat_id
 
 def main():
