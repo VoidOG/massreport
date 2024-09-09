@@ -1,9 +1,9 @@
 import os
-import asyncio
 from telethon import TelegramClient, functions
 from telethon.errors import SessionPasswordNeededError
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler, Filters, ConversationHandler
+import asyncio
 
 # Constants
 API_ID = '23459191'
@@ -62,7 +62,6 @@ def choose_report_type(update, context):
     query.answer()
     context.user_data['report_type'] = query.data
     
-    # Prompt user for reason after selecting the report type
     keyboard = [
         [InlineKeyboardButton("Spam", callback_data='spam')],
         [InlineKeyboardButton("Violence", callback_data='violence')],
@@ -81,9 +80,8 @@ def get_reason(update, context):
     query.answer()
     context.user_data['reason'] = query.data
     
-    # Prompt user for target info based on the report type
-    if context.user_data['report_type'] == 'report_message':
-        query.edit_message_text(text=f"Selected reason: {query.data}. Please provide the message link:")
+    if context.user_data['report_type'] == 'report_account':
+        query.edit_message_text(text=f"Selected reason: {query.data}. Please provide the target's user ID or username:")
     else:
         query.edit_message_text(text=f"Selected reason: {query.data}. Please provide the target info (username or link):")
     return TARGET_INFO
@@ -92,7 +90,6 @@ def handle_target_info(update, context):
     target_info = update.message.text
     context.user_data['target_info'] = target_info
     
-    # Prompt user for number of reports
     update.message.reply_text(f"Reporting {context.user_data['target_info']} for {context.user_data['reason']}. How many times do you want to report it?")
     return NUM_REPORTS
 
@@ -107,25 +104,24 @@ def get_num_reports(update, context):
     
     context.user_data['num_reports'] = num_reports
     update.message.reply_text(f"Reporting {context.user_data['target_info']} {num_reports} times for {context.user_data['reason']}.")
-
+    
     # Perform reporting asynchronously
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(report_targets(context.user_data['report_type'], context.user_data['target_info'], context.user_data['reason'], context.user_data['num_reports'], update.message))
+    asyncio.run(report_targets(context.user_data['report_type'], context.user_data['target_info'], context.user_data['reason'], context.user_data['num_reports']))
 
     return ConversationHandler.END
 
-async def report_targets(report_type, target_info, reason, num_reports, message):
+async def report_targets(report_type, target_info, reason, num_reports):
     for i in range(num_reports):
         for account in REPORTING_ACCOUNTS:
             await report_target(account, report_type, target_info, reason)
-            message.reply_text(f"{i + 1} report(s) sent.")
-    message.reply_text("Reporting completed.")
+            print(f"{i * len(REPORTING_ACCOUNTS) + REPORTING_ACCOUNTS.index(account) + 1} report(s) sent")
+    print("Reporting completed.")
 
 async def report_target(account, report_type, target_info, reason):
     client = TelegramClient(account['phone'], account['api_id'], account['api_hash'])
 
     async def perform_reporting():
-        await client.start(phone=account['phone'])
+        await client.start()
         try:
             if report_type == 'report_account':
                 await client(functions.account.ReportPeerRequest(
@@ -138,8 +134,7 @@ async def report_target(account, report_type, target_info, reason):
                     reason=REASONS_MAPPING.get(reason, 'other'),
                 ))
             elif report_type == 'report_message':
-                message_link = target_info
-                message_id, chat_id = extract_message_and_chat_id(message_link)
+                message_id, chat_id = extract_message_and_chat_id(target_info)
                 await client(functions.messages.ReportRequest(
                     peer=chat_id,
                     id=message_id,
@@ -148,15 +143,17 @@ async def report_target(account, report_type, target_info, reason):
         except SessionPasswordNeededError:
             password = input("Two-step verification is enabled. Enter your 2SV password: ")
             await client.start(password=password)
+            await perform_reporting()  # Retry after login
         finally:
             await client.disconnect()
 
     await perform_reporting()
 
 def extract_message_and_chat_id(message_link):
-    parts = message_link.strip().split('/')
-    chat_id = int(parts[-2])
-    message_id = int(parts[-1])
+    # Implement extraction of message ID and chat ID from the link
+    # This is a placeholder; implement actual extraction logic
+    message_id = 0
+    chat_id = 0
     return message_id, chat_id
 
 def main():
