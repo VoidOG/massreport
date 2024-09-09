@@ -1,40 +1,29 @@
 import os
 from telethon import TelegramClient, functions
 from telethon.errors import SessionPasswordNeededError
-from telethon.tl.types import (InputReportReasonSpam, InputReportReasonViolence, 
-                               InputReportReasonPornography, InputReportReasonOther, 
-                               InputReportReasonFake)
+from telethon.tl.types import ReportReason
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler, Filters, ConversationHandler
-from dotenv import load_dotenv
-
-# Load environment variables from .env file
-load_dotenv()
 
 # Constants
-API_ID = os.getenv('API_ID')
-API_HASH = os.getenv('API_HASH')
-BOT_TOKEN = os.getenv('BOT_TOKEN')
-authorized_ids = os.getenv('AUTHORIZED_USER_IDS', '')
-AUTHORIZED_USER_IDS = set(
-    int(id_str) for id_str in authorized_ids.split(',') if id_str.strip().isdigit()
-)
+API_ID = 'YOUR_API_ID'
+API_HASH = 'YOUR_API_HASH'
+BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN'
 
-# Check if AUTHORIZED_USER_IDS is empty and provide feedback
-if not AUTHORIZED_USER_IDS:
-    print("No valid authorized user IDs found. Please check the AUTHORIZED_USER_IDS in your .env file.")
+# Authorized User IDs (add your user IDs here)
+AUTHORIZED_USER_IDS = {123456789, 987654321}
 
 # Reporting accounts details
 REPORTING_ACCOUNTS = [
     {
-        'phone': os.getenv('REPORTER_1_PHONE_NUMBER'),
-        'api_id': os.getenv('REPORTER_1_API_ID'),
-        'api_hash': os.getenv('REPORTER_1_API_HASH')
+        'phone': 'YOUR_REPORTER_1_PHONE_NUMBER',
+        'api_id': 'YOUR_REPORTER_1_API_ID',
+        'api_hash': 'YOUR_REPORTER_1_API_HASH'
     },
     {
-        'phone': os.getenv('REPORTER_2_PHONE_NUMBER'),
-        'api_id': os.getenv('REPORTER_2_API_ID'),
-        'api_hash': os.getenv('REPORTER_2_API_HASH')
+        'phone': 'YOUR_REPORTER_2_PHONE_NUMBER',
+        'api_id': 'YOUR_REPORTER_2_API_ID',
+        'api_hash': 'YOUR_REPORTER_2_API_HASH'
     }
 ]
 
@@ -43,13 +32,13 @@ CHOOSING, REASON, TARGET_INFO, NUM_REPORTS = range(4)
 
 # Predefined reasons mapping
 REASONS_MAPPING = {
-    'spam': InputReportReasonSpam(),
-    'violence': InputReportReasonViolence(),
-    'hate_speech': InputReportReasonOther(),  # Since 'Hate Speech' doesn't have a direct mapping, 'Other' is used.
-    'sexual_content': InputReportReasonPornography(),
-    'harassment': InputReportReasonOther(),  # 'Harassment' can be categorized under 'Other'.
-    'fake_account': InputReportReasonFake(),
-    'other': InputReportReasonOther(),
+    'spam': ReportReason.SPAM,
+    'violence': ReportReason.VIOLENCE,
+    'hate_speech': ReportReason.HATE_SPEECH,
+    'sexual_content': ReportReason.SEXUAL_CONTENT,
+    'harassment': ReportReason.HARASSMENT,
+    'fake_account': ReportReason.FAKE_ACCOUNT,
+    'other': ReportReason.OTHER,
 }
 
 def start(update, context):
@@ -146,18 +135,18 @@ def report_target(account, report_type, target_info, reason):
                 ))
             elif report_type == 'report_message':
                 message_link = target_info
-                # Extract message ID and chat ID from the message link
+                # Extract message ID and chat ID from the link
                 message_id, chat_id = extract_message_and_chat_id(message_link)
                 await client(functions.messages.ReportRequest(
                     peer=chat_id,
-                    id=[message_id],  # Message ID needs to be passed as a list
-                    reason=report_reason,
+                    id=message_id,
+                    reason=report_reason
                 ))
         except SessionPasswordNeededError:
             # Handle two-step verification
-            print(f"Two-step verification is enabled for {account['phone']}. Please enter your 2SV password.")
-            password = input("Enter your 2SV password: ")
+            password = input("Two-step verification is enabled. Enter your 2SV password: ")
             await client.start(password=password)
+            # Retry reporting after successful login
         finally:
             await client.disconnect()
 
@@ -165,18 +154,11 @@ def report_target(account, report_type, target_info, reason):
         client.loop.run_until_complete(perform_reporting())
 
 def extract_message_and_chat_id(message_link):
-    # Placeholder implementation, needs actual parsing logic
-    # Extract message ID and chat ID from the provided message link
-    # Example: https://t.me/channel/1234
-    # Adjust regex based on the actual message link structure
-    try:
-        parts = message_link.split('/')
-        message_id = int(parts[-1])  # Assuming the last part is the message ID
-        chat_id = parts[-2]  # Assuming the second last part is the chat ID or username
-        return message_id, chat_id
-    except (ValueError, IndexError):
-        print("Error: Invalid message link format.")
-        return None, None
+    # Implement extraction of message ID and chat ID from the link
+    # This is a placeholder; implement actual extraction logic
+    message_id = 0
+    chat_id = 0
+    return message_id, chat_id
 
 def main():
     updater = Updater(BOT_TOKEN, use_context=True)
