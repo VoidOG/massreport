@@ -56,7 +56,7 @@ def start(update, context):
         [InlineKeyboardButton("Report Specific Message", callback_data='report_message')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text('Welcome to [C Ξ N Z O](https://t.me/Cenzeo) Mass Report Tool! Please choose what you want to report:', reply_markup=reply_markup)
+    update.message.reply_text('Welcome to Cenzo Mass Report Tool! Please choose what you want to report:', reply_markup=reply_markup)
     return CHOOSING
 
 def choose_report_type(update, context):
@@ -112,3 +112,83 @@ def get_num_reports(update, context):
 
     # Perform reporting
     for _ in range(num_reports):
+        for account in REPORTING_ACCOUNTS:
+            report_target(account, context.user_data['report_type'], context.user_data['target_info'], context.user_data['reason'])
+
+    return ConversationHandler.END
+
+def report_target(account, report_type, target_info, reason):
+    client = TelegramClient(account['phone'], account['api_id'], account['api_hash'])
+
+    async def perform_reporting():
+        await client.start(phone=account['phone'])
+        try:
+            report_reason = REASONS_MAPPING.get(reason, ReportReason.OTHER)
+            
+            if report_type == 'report_account':
+                await client(functions.account.ReportPeerRequest(
+                    peer=target_info,
+                    reason=report_reason,
+                ))
+            elif report_type in ['report_group', 'report_channel']:
+                await client(functions.messages.ReportRequest(
+                    peer=target_info,
+                    reason=report_reason,
+                ))
+            elif report_type == 'report_message':
+                message_link = target_info
+                # Extract message ID and chat ID from the message link
+                message_id, chat_id = extract_message_and_chat_id(message_link)
+                await client(functions.messages.ReportRequest(
+                    peer=chat_id,
+                    id=[message_id],  # Message ID needs to be passed as a list
+                    reason=report_reason,
+                ))
+        except SessionPasswordNeededError:
+            # Handle two-step verification
+            print(f"Two-step verification is enabled for {account['phone']}. Please enter your 2SV password.")
+            password = input("Enter your 2SV password: ")
+            await client.start(password=password)
+        finally:
+            await client.disconnect()
+
+    with client:
+        client.loop.run_until_complete(perform_reporting())
+
+def extract_message_and_chat_id(message_link):
+    # Placeholder implementation, needs actual parsing logic
+    # Extract message ID and chat ID from the provided message link
+    # Example: https://t.me/channel/1234
+    # Adjust regex based on the actual message link structure
+    try:
+        parts = message_link.split('/')
+        message_id = int(parts[-1])  # Assuming the last part is the message ID
+        chat_id = parts[-2]  # Assuming the second last part is the chat ID or username
+        return message_id, chat_id
+    except (ValueError, IndexError):
+        print("Error: Invalid message link format.")
+        return None, None
+
+def main():
+    updater = Updater(BOT_TOKEN, use_context=True)
+    
+    dp = updater.dispatcher
+    
+    conversation_handler = ConversationHandler(
+        entry_points=[CommandHandler('start', start)],
+        states={
+            CHOOSING: [CallbackQueryHandler(choose_report_type)],
+            REASON: [CallbackQueryHandler(get_reason)],
+            TARGET_INFO: [MessageHandler(Filters.text & ~Filters.command, handle_target_info)],
+            NUM_REPORTS: [MessageHandler(Filters.text & ~Filters.command, get_num_reports)],
+        },
+        fallbacks=[CommandHandler('start', start)],
+    )
+    
+    dp.add_handler(conversation_handler)
+    
+    updater.start_polling()
+    updater.idle()
+
+if __name__ == '__main__':
+    main()
