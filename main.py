@@ -36,7 +36,6 @@ CHOOSING, REASON, TARGET_INFO, NUM_REPORTS = range(4)
 
 # Predefined reasons mapping
 REASONS_MAPPING = {
-REASONS_MAPPING = {
     'spam': InputReportReasonSpam(),
     'violence': InputReportReasonViolence(),
     'hate_speech': InputReportReasonOther(),  # Since 'Hate Speech' doesn't have a direct mapping, 'Other' is used.
