@@ -1,9 +1,9 @@
-import os
+import asyncio
 from telethon import TelegramClient, functions
+from telethon.sessions import StringSession
 from telethon.errors import SessionPasswordNeededError
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler, Filters, ConversationHandler
-import asyncio
 
 # Constants
 API_ID = '23459191'
@@ -13,17 +13,17 @@ BOT_TOKEN = '7240682346:AAF6gZNwrO3CPLBPYYtg0yiEPxZVTqoJut0'
 # Authorized User IDs
 AUTHORIZED_USER_IDS = {6663845789, 1110013191, 6698364560}
 
-# Reporting accounts details
+# Reporting accounts details with string sessions
 REPORTING_ACCOUNTS = [
     {
-        'phone': '+919352148429',
-        'api_id': '23459191',
-        'api_hash': 'd5f3a01c7bcb41aa1214808b5818c109'
+        'session_string': 'YOUR_STRING_SESSION_1',  # Replace with actual string session
+        'api_id': API_ID,
+        'api_hash': API_HASH
     },
     {
-        'phone': '+27636385630',
-        'api_id': '25162649',
-        'api_hash': '2ec36ea724f3b846f217a7677e3b5cfd'
+        'session_string': 'YOUR_STRING_SESSION_2',  # Replace with actual string session
+        'api_id': API_ID,
+        'api_hash': API_HASH
     }
 ]
 
@@ -118,7 +118,7 @@ async def report_targets(report_type, target_info, reason, num_reports):
     print("Reporting completed.")
 
 async def report_target(account, report_type, target_info, reason):
-    client = TelegramClient(account['phone'], account['api_id'], account['api_hash'])
+    client = TelegramClient(StringSession(account['session_string']), account['api_id'], account['api_hash'])
 
     async def perform_reporting():
         await client.start()
@@ -152,8 +152,8 @@ async def report_target(account, report_type, target_info, reason):
 def extract_message_and_chat_id(message_link):
     # Implement extraction of message ID and chat ID from the link
     # This is a placeholder; implement actual extraction logic
-    message_id = 0
-    chat_id = 0
+    message_id = 123456  # Example message ID
+    chat_id = 654321  # Example chat ID
     return message_id, chat_id
 
 def main():
