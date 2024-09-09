@@ -56,7 +56,7 @@ def start(update, context):
         [InlineKeyboardButton("Report Specific Message", callback_data='report_message')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    update.message.reply_text('Welcome to Cenzo Mass Report Tool! Please choose what you want to report:', reply_markup=reply_markup)
+    update.message.reply_text('Welcome to [C Ξ N Z O](https://t.me/Cenzeo) Mass Report Tool! Please choose what you want to report:', reply_markup=reply_markup)
     return CHOOSING
 
 def choose_report_type(update, context):
