@@ -18,12 +18,12 @@ REPORTING_ACCOUNTS = [
     {
         'session_string': '1BVtsOHwBu4Sep8EoDdbaw1b_tYuq_RtU-mtyLOAUPQvzJqXVEphbcIxF2aq9LrzGl2e1EdEq0eiJfcCVa3vl6YGaTjGoEaMkOjlwP2rWv3l9NOPxms5CIjDICgRVmJXDVO-q-viBftmdqxj-XIpe-77PGPwrcTC8Ayu0t3IISbIpiNBkb9lqHuAxNtyeBLYRVHHRnTx9id3sKiUKEkC0pdg5tUMEJAVcXGleVOgHVxud70kHyegfz8zGyfMXYqWPe9qtjwwoVRQHHPPuqCdCcyheKuYlP8DJD-mdN8hmwYQH7WyvPd3_ziHjftwxkXFuSNpZ9nM3QNgxaYJDbM2tEr3Bbt22zTo=',  # Replace with actual string session
         'api_id': int(getenv(REPORTER_1_API_ID)),
-        'api_hash':getenv(REPORTER_1_API_HASH)
+        'api_hash': getenv(REPORTER_1_API_HASH)
     },
     {
         'session_string': '1BVtsOK8Bu7x0YluVcvaP91cRaJz7hDz-IoJDcwj2cGNIa3srai-9TA-pGFZgvkS9svr4S0pkJEKG5rWVN7itYVHDHeiO_k91JKrtMrNDR0FI0roypGz81jrK6hb4bvxHYxkHiRSu3cvWmZtqAYiJTh7cbR5XH3jjFyAV2xQJ8q29fUdSNhYpEfNtQCOQYACQr0pTFIucJLebLtpyt0AnSDpUhoyf9mVPv3fZ_z5YNozTIPG3A4NIhZZ-NvBYbh57Pe3m6XJyTryDvT2NoDlupR7-G0WpBnHsRgM2lc0uvN4Nsmp2jjkq2lfSQ8J4rcgLjlJ0BNG2kQ5jtoVUg6naNcikRyBvsps=',  # Replace with actual string session
-        'api_id': REPORTER_2_API_ID,
-        'api_hash': REPORTER_2_API_HASH
+        'api_id': int(getenv(REPORTER_2_API_ID)),
+        'api_hash': getenv(REPORTER_2_API_HASH)
     }
 ]
 
