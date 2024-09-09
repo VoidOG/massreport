@@ -1,4 +1,5 @@
 import os
+import asyncio
 from telethon import TelegramClient, functions
 from telethon.errors import SessionPasswordNeededError
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -108,13 +109,19 @@ def get_num_reports(update, context):
     update.message.reply_text(f"Reporting {context.user_data['target_info']} {num_reports} times for {context.user_data['reason']}.")
 
     # Perform reporting
-    for _ in range(num_reports):
-        for account in REPORTING_ACCOUNTS:
-            report_target(account, context.user_data['report_type'], context.user_data['target_info'], context.user_data['reason'])
+    asyncio.run(report_targets(context.user_data['report_type'], context.user_data['target_info'], context.user_data['reason'], context.user_data['num_reports']))
 
     return ConversationHandler.END
 
-def report_target(account, report_type, target_info, reason):
+async def report_targets(report_type, target_info, reason, num_reports):
+    for i in range(num_reports):
+        for account in REPORTING_ACCOUNTS:
+            await report_target(account, report_type, target_info, reason)
+            print(f"{i + 1} report(s) sent for {target_info}.")
+
+    print("Reporting completed.")
+
+async def report_target(account, report_type, target_info, reason):
     client = TelegramClient(account['phone'], account['api_id'], account['api_hash'])
 
     async def perform_reporting():
@@ -147,8 +154,7 @@ def report_target(account, report_type, target_info, reason):
         finally:
             await client.disconnect()
 
-    with client:
-        client.loop.run_until_complete(perform_reporting())
+    await perform_reporting()
 
 def extract_message_and_chat_id(message_link):
     # Implement extraction of message ID and chat ID from the link
