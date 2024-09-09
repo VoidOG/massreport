@@ -15,9 +15,14 @@ load_dotenv()
 API_ID = os.getenv('API_ID')
 API_HASH = os.getenv('API_HASH')
 BOT_TOKEN = os.getenv('BOT_TOKEN')
+authorized_ids = os.getenv('AUTHORIZED_USER_IDS', '')
 AUTHORIZED_USER_IDS = set(
-    map(int, (os.getenv('AUTHORIZED_USER_IDS') or "").split(' '))
+    int(id_str) for id_str in authorized_ids.split(',') if id_str.strip().isdigit()
 )
+
+# Check if AUTHORIZED_USER_IDS is empty and provide feedback
+if not AUTHORIZED_USER_IDS:
+    print("No valid authorized user IDs found. Please check the AUTHORIZED_USER_IDS in your .env file.")
 
 # Reporting accounts details
 REPORTING_ACCOUNTS = [
