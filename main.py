@@ -1,8 +1,17 @@
 from pyrogram import Client
-from pyrogram.enums import ReportReason
 import os
 from threading import Thread
 from colorama import Fore, init
+
+class ReportReason:
+    SPAM = "spam"
+    VIOLENCE = "violence"
+    CHILD_ABUSE = "child_abuse"
+    PORNOGRAPHY = "pornography"
+    FAKE = "fake"
+    ILLEGAL_DRUGS = "illegal_drugs"
+    COPYRIGHT = "copyright"
+    OTHER = "other"
 
 # Initialize Colorama
 init(autoreset=True)
@@ -78,13 +87,24 @@ def main():
         print(Fore.RED + "Invalid choice. Exiting.")
         return
 
-    # Select the reason for reporting
-    print(Fore.CYAN + "\nReport Reasons:")
-    for i, reason in enumerate(ReportReason, 1):
-        print(Fore.YELLOW + f"{i}. {reason.name}")
+  # Select the reason for reporting
+print(Fore.CYAN + "\nReport Reasons:")
+reasons = [
+    ReportReason.SPAM,
+    ReportReason.VIOLENCE,
+    ReportReason.CHILD_ABUSE,
+    ReportReason.PORNOGRAPHY,
+    ReportReason.FAKE,
+    ReportReason.ILLEGAL_DRUGS,
+    ReportReason.COPYRIGHT,
+    ReportReason.OTHER,
+]
 
-    reason_choice = int(input(Fore.CYAN + "Select a reason (1-9): "))
-    reason = list(ReportReason)[reason_choice - 1]
+for i, reason in enumerate(reasons, 1):
+    print(Fore.YELLOW + f"{i}. {reason.replace('_', ' ').title()}")
+
+reason_choice = int(input(Fore.CYAN + "Select a reason (1-8): "))
+reason = reasons[reason_choice - 1]
 
     # Input for number of reports
     report_count = int(input(Fore.YELLOW + "\nEnter the number of reports (max 10,000): "))
