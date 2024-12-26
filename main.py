@@ -107,10 +107,10 @@ reason_choice = int(input(Fore.CYAN + "Select a reason (1-8): "))
 reason = reasons[reason_choice - 1]
 
     # Input for number of reports
-    report_count = int(input(Fore.YELLOW + "\nEnter the number of reports (max 10,000): "))
-    if report_count > 10000:
-        print(Fore.RED + "Exceeded the maximum limit of 10,000. Exiting.")
-        return
+report_count = int(input(Fore.YELLOW + "\nEnter the number of reports (max 10,000): "))
+if report_count > 10000:
+    print(Fore.RED + "Exceeded the maximum limit of 10,000. Exiting.")
+    return
 
     # Start reporting with all session strings
     threads = []
